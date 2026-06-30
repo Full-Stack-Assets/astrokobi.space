@@ -54,8 +54,7 @@ jobs:
             exit 1
           fi
           if [ -z "${BRAVE_API_KEY}" ]; then
-            echo "BRAVE_API_KEY is not set. Evergreen topics need web search for research." >&2
-            exit 1
+            echo "::warning::BRAVE_API_KEY is not set — seed will use Wikipedia fallback for research."
           fi
 
       # Opt-in only. Defaults to false, so a normal run never deletes anything.
