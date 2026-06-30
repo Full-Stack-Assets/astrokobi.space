@@ -28,6 +28,32 @@ async function braveWebSearch(query: string): Promise<BraveWebResult[]> {
   return json.web?.results ?? [];
 }
 
+/** Keyless fallback when Brave is unset or returns nothing (common in seed runs). */
+async function wikipediaSearch(query: string): Promise<BraveWebResult[]> {
+  try {
+    const api = new URL('https://en.wikipedia.org/w/api.php');
+    api.searchParams.set('action', 'query');
+    api.searchParams.set('list', 'search');
+    api.searchParams.set('srsearch', query);
+    api.searchParams.set('format', 'json');
+    api.searchParams.set('srlimit', '3');
+    api.searchParams.set('origin', '*');
+
+    const res = await fetch(api.toString(), { headers: { 'user-agent': SCRAPER_UA } });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      query?: { search?: Array<{ title: string; snippet: string }> };
+    };
+    return (json.query?.search ?? []).map((hit) => ({
+      url: `https://en.wikipedia.org/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`,
+      title: hit.title,
+      description: hit.snippet.replace(/<[^>]+>/g, ''),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 async function scrapeArticle(url: string): Promise<{ title: string; content: string } | null> {
   try {
     const controller = new AbortController();
@@ -89,7 +115,11 @@ export async function research(
   // Build a search query from the winner's title, stripping common filler
   const query = winner.title.replace(/[^\w\s]/g, ' ').split(/\s+/).slice(0, 10).join(' ');
 
-  const searchResults = await braveWebSearch(query);
+  let searchResults = await braveWebSearch(query);
+  if (searchResults.length === 0) {
+    console.warn('[research] Brave returned nothing — trying Wikipedia fallback');
+    searchResults = await wikipediaSearch(query);
+  }
 
   // Scrape top 3 unique domains, excluding the winner's own URL
   const winnerHost = (() => {
