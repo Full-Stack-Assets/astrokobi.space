@@ -34,6 +34,7 @@ jobs:
       - run: npm ci
       - name: Re-image posts
         env:
+          NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
           if [ "${{ github.event.inputs.mode }}" = "missing" ]; then
@@ -42,10 +43,13 @@ jobs:
             npx tsx scripts/reimage.ts
           fi
       - name: Commit and push
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+          PRODUCTION_BRANCH: main
         run: |
-          git config user.name "trendblog-bot"
-          git config user.email "bot@trendblog.dev"
-          git add content/posts
+          git config user.name "astrokobi-bot"
+          git config user.email "bot@astrokobi.com"
+          git add content/editorial
           if git diff --cached --quiet; then
             echo "No image changes to commit."
             exit 0
@@ -55,6 +59,11 @@ jobs:
           for attempt in 1 2 3 4 5; do
             if git push origin "HEAD:${branch}"; then
               echo "Pushed on attempt ${attempt}."
+              if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ] && [ "${branch}" = "${PRODUCTION_BRANCH}" ]; then
+                curl -fsS -m 30 --retry 3 -X POST "${VERCEL_DEPLOY_HOOK_URL}" >/dev/null \
+                  && echo "Vercel redeploy triggered." \
+                  || echo "Vercel deploy hook failed (non-fatal)." >&2
+              fi
               exit 0
             fi
             echo "Push rejected (attempt ${attempt}); rebasing and retrying..."
