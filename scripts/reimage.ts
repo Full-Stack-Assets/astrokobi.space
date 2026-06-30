@@ -44,11 +44,13 @@ function replaceHero(
     `  alt: ${q(hero.alt)}\n` +
     `  credit: ${q(hero.credit)}\n` +
     `  creditUrl: ${q(hero.creditUrl)}`;
-  // Match the existing 4-line hero block; ` *` (literal spaces) so it never
-  // crosses a line boundary and only the hero block is touched.
-  const re = /hero:\n *url:.*\n *alt:.*\n *credit:.*\n *creditUrl:.*/;
-  if (!re.test(raw)) return null;
-  return raw.replace(re, block);
+  // Multiline block (engine output) — allow optional whitespace after `hero:`.
+  const multiline = /hero:\s*\n( +)url:[^\n]*\n\1alt:[^\n]*\n\1credit:[^\n]*\n\1creditUrl:[^\n]*/;
+  // Inline block (hand-authored posts): hero: { url: "", ... }
+  const inline = /hero:\s*\{[^}]*\}/;
+  if (multiline.test(raw)) return raw.replace(multiline, block);
+  if (inline.test(raw)) return raw.replace(inline, block);
+  return null;
 }
 
 async function main() {
