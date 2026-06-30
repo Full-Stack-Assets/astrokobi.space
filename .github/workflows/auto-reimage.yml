@@ -1,0 +1,58 @@
+name: Auto Re-image (push trigger)
+
+# Runs when .github/triggers/reimage-all is pushed to main. Removes the
+# trigger file after a successful run.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/reimage-all']
+
+concurrency:
+  group: reimage-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  reimage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Re-image posts
+        env:
+          NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: npx tsx scripts/reimage.ts
+      - name: Commit and push
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+          PRODUCTION_BRANCH: main
+        run: |
+          git config user.name "astrokobi-bot"
+          git config user.email "bot@astrokobi.com"
+          rm -f .github/triggers/reimage-all
+          git add content/editorial .github/triggers/
+          if git diff --cached --quiet; then
+            echo "No image changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: refresh hero images for accuracy [auto-trigger]"
+          branch="${GITHUB_REF_NAME:-main}"
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:${branch}"; then
+              if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ] && [ "${branch}" = "${PRODUCTION_BRANCH}" ]; then
+                curl -fsS -m 30 --retry 3 -X POST "${VERCEL_DEPLOY_HOOK_URL}" >/dev/null || true
+              fi
+              exit 0
+            fi
+            git fetch origin "${branch}"
+            git rebase "origin/${branch}" || git rebase --abort || true
+          done
+          exit 1
