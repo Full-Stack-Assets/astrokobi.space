@@ -468,6 +468,90 @@
       "url": "https://bigthink.com/history-society/he-won-a-major-short-story-prize-then-he-was-accused-of-using-ai/",
       "publishedAt": "2026-07-04T09:15:53.987Z",
       "signature": "e0f9ca6d23cab145"
+    },
+    {
+      "slug": "how-large-language-models-actually-work",
+      "title": "How large language models actually work, explained simply",
+      "url": "",
+      "publishedAt": "2026-06-02T12:00:00.000Z",
+      "signature": "4e20c065a80342cc"
+    },
+    {
+      "slug": "assessing-human-mars-colonization-feasibility",
+      "title": "The case for and against human space colonization",
+      "url": "",
+      "publishedAt": "2026-06-05T12:00:00.000Z",
+      "signature": "9883b8488a4835fb"
+    },
+    {
+      "slug": "black-holes-formation-evolution-cosmic-impact",
+      "title": "What is a black hole and how do they form",
+      "url": "",
+      "publishedAt": "2026-06-10T12:00:00.000Z",
+      "signature": "8692b109df5bd187"
+    },
+    {
+      "slug": "quest-for-lifes-meaning-philosophy-science-history",
+      "title": "What life extension research says about the limits of human aging",
+      "url": "",
+      "publishedAt": "2026-06-11T12:00:00.000Z",
+      "signature": "41135880fb6e95db"
+    },
+    {
+      "slug": "unpacking-neural-networks-how-machines-learn-data",
+      "title": "Neural networks explained: how machines learn from data",
+      "url": "",
+      "publishedAt": "2026-06-14T12:00:00.000Z",
+      "signature": "0c23dbf8de363ed9"
+    },
+    {
+      "slug": "what-we-do-in-the-shadows-legacy-characters",
+      "title": "What is dark matter and why do we think it exists",
+      "url": "",
+      "publishedAt": "2026-06-16T12:00:00.000Z",
+      "signature": "f38788ae6279d265"
+    },
+    {
+      "slug": "fermi-paradox-where-is-everybody-cosmic-mystery",
+      "title": "The Fermi paradox: where is everybody",
+      "url": "",
+      "publishedAt": "2026-06-19T12:00:00.000Z",
+      "signature": "000de9e6bfd79be8"
+    },
+    {
+      "slug": "turing-test-what-it-measures-machine-intelligence",
+      "title": "The Turing test and what it actually measures about machine intelligence",
+      "url": "",
+      "publishedAt": "2026-06-20T12:00:00.000Z",
+      "signature": "3c5253a35485ea5d"
+    },
+    {
+      "slug": "dyson-sphere-alien-life-megastructure-seti",
+      "title": "What a Dyson sphere is and why it matters for the search for alien civilizations",
+      "url": "",
+      "publishedAt": "2026-06-22T12:00:00.000Z",
+      "signature": "cc7653a6519313e0"
+    },
+    {
+      "slug": "brain-computer-interfaces-reshaping-human-cognition",
+      "title": "How brain-computer interfaces could change human cognition",
+      "url": "",
+      "publishedAt": "2026-06-23T12:00:00.000Z",
+      "signature": "0c64230296f62c8e"
+    },
+    {
+      "slug": "the-generative-ai-journey-from-algorithms-to-systems",
+      "title": "How AI models are trained: from raw data to a working system",
+      "url": "",
+      "publishedAt": "2026-06-28T12:00:00.000Z",
+      "signature": "c45df9fcbb2d0de3"
+    },
+    {
+      "slug": "technological-singularity-ai-explosive-future-debate",
+      "title": "What is the singularity and why researchers disagree about it",
+      "url": "",
+      "publishedAt": "2026-06-29T12:00:00.000Z",
+      "signature": "b00bc9a0f508ffd0"
     }
   ]
 }
