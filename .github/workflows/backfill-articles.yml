@@ -1,0 +1,87 @@
+name: Backfill Long-Form Articles
+
+# One-time, manually-triggered batch: runs scripts/backfill-articles.ts, which
+# generates 18 long-form (roughly double-length) evergreen posts dated to the
+# specific historical days that had 0 or 1 posts, then commits the result.
+# Mirrors the Seed Backfill workflow's structure — runs in CI so it uses the
+# repo's existing Actions secrets, and pushes to whatever ref triggered it
+# (so a dispatch against a feature branch lands the content on that branch
+# for review, not on main).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: backfill-articles-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run backfill
+        env:
+          # Site identity — must match .env.production / Vercel for astrokobi.space.
+          NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
+          # LLM key — name must match `llm.apiKeyEnv` in src/site.config.ts.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Required: these evergreen topics have no source URL, so research
+          # relies on web search.
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          # Optional: hero images (falls back to keyless Openverse, then none).
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: npx tsx scripts/backfill-articles.ts
+
+      - name: Commit and push
+        run: |
+          git config user.name "trendblog-bot"
+          git config user.email "bot@trendblog.dev"
+
+          # Union merge driver for content/.topic-log.json (mapped in .gitattributes)
+          # so a rebase against a concurrent run auto-merges the log.
+          git config merge.topiclog.name "union topic log entries"
+          git config merge.topiclog.driver "node scripts/merge-topic-log.mjs %O %A %B"
+
+          git add content/
+          if git diff --cached --quiet; then
+            echo "No new posts generated — nothing to commit."
+            exit 0
+          fi
+
+          count=$(git diff --cached --name-only --diff-filter=A -- 'content/editorial/*.mdx' | wc -l | tr -d ' ')
+          git commit -m "post: backfill ${count} long-form article(s)"
+
+          # The remote may have advanced (a rebase against origin picks up
+          # anything else that landed on this ref meanwhile). The topic-log
+          # merge driver resolves the only file two runs could both touch.
+          branch="${GITHUB_REF_NAME:-main}"
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:${branch}"; then
+              echo "Pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}); rebasing onto origin/${branch}..."
+            git fetch origin "${branch}"
+            if ! git rebase "origin/${branch}"; then
+              echo "Rebase did not complete cleanly; aborting this attempt." >&2
+              git rebase --abort || true
+            fi
+          done
+
+          echo "Failed to push after multiple attempts." >&2
+          exit 1

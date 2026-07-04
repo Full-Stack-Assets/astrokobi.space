@@ -142,6 +142,10 @@ export interface TopicPipelineOptions {
   /** Frontmatter date for the post (defaults to now). The seed runner spreads
    *  these across recent history to build a believable back catalog. */
   date?: Date;
+  /** Forwarded to generate() — see GenerateOptions for both fields. Used by
+   *  scripts/backfill-articles.ts to produce long-form, double-length posts. */
+  targetWords?: number;
+  minBodyChars?: number;
 }
 
 /**
@@ -187,7 +191,7 @@ export async function generateForTopic(
     }
 
     const doneGen = t('generate');
-    const post = await generate(bundle);
+    const post = await generate(bundle, { targetWords: opts.targetWords, minBodyChars: opts.minBodyChars });
     post.heroImage = await pickImage(post);
     const mdx = serialize(post, when);
     doneGen();

@@ -162,7 +162,21 @@ HARD RULES:
 - American English.
 - Do not wrap the JSON in markdown code fences.`;
 
-export async function generate(bundle: ResearchBundle): Promise<GeneratedPost> {
+export interface GenerateOptions {
+  /** Guidance embedded in the prompt: the approximate word count to aim for
+   *  (e.g. for a long-form/double-length feature). Omit for the standard body. */
+  targetWords?: number;
+  /** Runtime floor for the body's character count, overriding PostSchema's
+   *  default min(800) for this call only — lets a long-form batch enforce a
+   *  meaningfully longer body without changing the standard contract used by
+   *  the hourly pipeline and the regular seed runner. */
+  minBodyChars?: number;
+}
+
+export async function generate(
+  bundle: ResearchBundle,
+  opts: GenerateOptions = {}
+): Promise<GeneratedPost> {
   const primaryKey = process.env[PRIMARY_LLM.apiKeyEnv];
   if (!primaryKey) throw new Error(`${PRIMARY_LLM.apiKeyEnv} not set`);
   const fallbackKey = FALLBACK_LLM ? (process.env[FALLBACK_LLM.apiKeyEnv] ?? '').trim() : '';
@@ -172,7 +186,10 @@ export async function generate(bundle: ResearchBundle): Promise<GeneratedPost> {
   let providerKey = primaryKey;
   let failedOver = false;
 
-  const baseUserPrompt = buildUserPrompt(bundle);
+  const baseUserPrompt = buildUserPrompt(bundle, opts.targetWords);
+  const schema = opts.minBodyChars
+    ? PostSchema.extend({ body: z.string().min(opts.minBodyChars) })
+    : PostSchema;
   let lastError = '';
 
   // PostSchema heals the clampable overshoots on its own. Retry only covers the
@@ -216,7 +233,7 @@ export async function generate(bundle: ResearchBundle): Promise<GeneratedPost> {
       continue;
     }
 
-    const result = PostSchema.safeParse(parsed);
+    const result = schema.safeParse(parsed);
     if (result.success) {
       // A response truncated at the token cap (cut off mid-FAQ) leaves an
       // unclosed <Question>/<FAQ> that passes the length-only schema but then
@@ -314,8 +331,12 @@ function finalize(validated: z.infer<typeof PostSchema>, bundle: ResearchBundle)
   };
 }
 
-function buildUserPrompt(bundle: ResearchBundle): string {
+function buildUserPrompt(bundle: ResearchBundle, targetWords?: number): string {
   const { winner, articles, transcripts, related } = bundle;
+
+  const lengthBlock = targetWords
+    ? `\n\n## Length requirement\nThis is a long-form, in-depth feature — write a substantially longer and more detailed body than usual. Target approximately ${targetWords} words total (roughly double the normal length): go deeper in "What happened" and "Why it matters", broaden the pros/cons with more items, and make "How to think about it" more thorough with concrete detail. Do not pad with repetition, filler, or invented content — every added sentence must be substantive and grounded in the research provided.`
+    : '';
 
   const articleBlock = articles
     .map(
@@ -347,6 +368,7 @@ ${a.content.slice(0, 4000)}`
 ${articleBlock}
 ${transcriptBlock}
 ${relatedBlock}
+${lengthBlock}
 
 Produce the JSON object now.`;
 }
