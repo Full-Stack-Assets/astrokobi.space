@@ -1,9 +1,14 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { listPosts } from '@/lib/posts';
 import { SignalVisual } from '@/components/SignalVisual';
 import { siteConfig } from '@/site.config';
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default async function HomePage() {
   const posts = await listPosts();

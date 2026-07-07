@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { listPosts } from '@/lib/posts';
+import { SITE_NAME } from '@/lib/structured-data';
 
 export const revalidate = 300;
 
@@ -8,6 +10,19 @@ export async function generateStaticParams() {
   const posts = await listPosts();
   const tags = Array.from(new Set(posts.flatMap((p) => p.frontmatter.tags ?? [])));
   return tags.map((tag) => ({ tag }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {
+  const { tag } = await params;
+  const title = `#${tag}`;
+  const description = `Everything ${SITE_NAME} has published under #${tag}.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/tags/${tag}` },
+    openGraph: { title, description, url: `/tags/${tag}` },
+    twitter: { card: 'summary', title, description },
+  };
 }
 
 export default async function TagPage({ params }: { params: Promise<{ tag: string }> }) {

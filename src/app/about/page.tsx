@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { siteConfig } from '@/site.config';
 
-export const metadata = { title: 'About' };
+export const metadata = {
+  title: 'About',
+  description: `What ${siteConfig.name} is, how it's made, and the editorial standards behind it.`,
+  alternates: { canonical: '/about' },
+};
 
 export default function AboutPage() {
   return (

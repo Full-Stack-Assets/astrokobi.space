@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { listPosts } from '@/lib/posts';
+import { SITE_NAME } from '@/lib/structured-data';
 
 export const revalidate = 300;
 
@@ -8,6 +10,19 @@ export async function generateStaticParams() {
   const posts = await listPosts();
   const cats = Array.from(new Set(posts.map((p) => p.frontmatter.category)));
   return cats.map((category) => ({ category }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata> {
+  const { category } = await params;
+  const title = category[0].toUpperCase() + category.slice(1);
+  const description = `The latest ${category} dispatches from ${SITE_NAME}.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/categories/${category}` },
+    openGraph: { title, description, url: `/categories/${category}` },
+    twitter: { card: 'summary', title, description },
+  };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {

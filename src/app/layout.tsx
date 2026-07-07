@@ -24,8 +24,10 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  // NOTE: no `canonical` here — a layout-level canonical is inherited by every
+  // route that doesn't define its own `alternates`, silently canonicalizing
+  // them all to the homepage. Each page sets its own canonical instead.
   alternates: {
-    canonical: '/',
     types: { 'application/rss+xml': `${SITE_URL}/feed.xml` },
   },
   openGraph: {

@@ -6,7 +6,11 @@ import type { TopicLog } from '@/lib/orchestrator/types';
 import { siteConfig } from '@/site.config';
 
 export const revalidate = 300;
-export const metadata = { title: 'Stats' };
+export const metadata = {
+  title: 'Stats',
+  description: `Publishing stats and pipeline activity for ${siteConfig.name}.`,
+  alternates: { canonical: '/stats' },
+};
 
 async function loadLog(): Promise<TopicLog> {
   try {

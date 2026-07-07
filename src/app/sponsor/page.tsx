@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/structured-data';
 export const metadata: Metadata = {
   title: 'Sponsor',
   description: `Reach an engaged audience of ${siteConfig.audience} on ${siteConfig.name}.`,
+  alternates: { canonical: '/sponsor' },
 };
 
 // Sponsor inquiries go to sponsor@<domain>. Override by editing this line.
