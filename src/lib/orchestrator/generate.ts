@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import type { ResearchBundle, GeneratedPost } from './types';
+import { mdxCompileError } from './mdx-validate';
+import { sanitizeBody } from './serialize';
 import { siteConfig } from '@/site.config';
 
 type LlmProvider = { endpoint: string; model: string; apiKeyEnv: string };
@@ -241,6 +243,16 @@ export async function generate(
       const unbalanced = findUnbalancedMdxTag(result.data.body);
       if (unbalanced) {
         lastError = `body has an unbalanced MDX tag: ${unbalanced} (likely a truncated response)`;
+        continue;
+      }
+      // Balanced tags can still fail to *parse* (e.g. an inline-opened
+      // <Question> closed at block position) — which would pass generation and
+      // then break the production build at prerender. Compile the body through
+      // the site's own MDX pipeline and treat a failure like any other
+      // unrepairable miss: retry with the compiler's error fed back.
+      const compileError = await mdxCompileError(sanitizeBody(result.data.body));
+      if (compileError) {
+        lastError = `body failed to compile as MDX: ${compileError.slice(0, 300)}`;
         continue;
       }
       return finalize(result.data, bundle);
