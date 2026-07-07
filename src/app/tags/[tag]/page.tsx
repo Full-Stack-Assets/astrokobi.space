@@ -46,6 +46,13 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
               </h2>
               <p className="mt-1 text-ink/70">{p.frontmatter.description}</p>
             </Link>
+            <div className="mt-2 flex items-center gap-3 text-xs uppercase tracking-widest text-muted">
+              <Link href={`/categories/${p.frontmatter.category}`} className="text-accent hover:underline">
+                {p.frontmatter.category}
+              </Link>
+              <span>{new Date(p.frontmatter.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span>· {p.readingTimeMin} min</span>
+            </div>
           </li>
         ))}
       </ul>

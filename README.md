@@ -114,6 +114,28 @@ the list.
 
 ---
 
+## Monetization (optional)
+
+Every monetization surface is config-gated: leave a value blank and the surface
+renders nothing. All values below are **owner-supplied** — nothing is invented
+or defaulted.
+
+| Value | Where to get it | What it turns on |
+|---|---|---|
+| `NEXT_PUBLIC_ADSENSE_CLIENT` (or `adsenseClient` in `src/site.config.ts`) | [AdSense](https://adsense.google.com) → Account → your `ca-pub-…` id | Loads the AdSense script, serves `/ads.txt`, enables Auto Ads |
+| `NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE` | AdSense → Ads → By ad unit (in-article) | Fluid unit after each post body |
+| `NEXT_PUBLIC_ADSENSE_SLOT_MID_ARTICLE` | AdSense → Ads → By ad unit (in-article) | Fluid unit between a post's analysis and FAQ sections |
+| `NEXT_PUBLIC_ADSENSE_SLOT_LISTING` | AdSense → Ads → By ad unit (display) | Display unit on the homepage below the lead story |
+| `NEXT_PUBLIC_ADSENSE_SLOT_FOOTER` | AdSense → Ads → By ad unit (display) | Display unit in the site-wide footer |
+| `NEXT_PUBLIC_AMAZON_AFFILIATE_TAG` (or `affiliate.amazonTag` in `src/site.config.ts`) | [Amazon Associates](https://affiliate-program.amazon.com) tracking id, e.g. `yoursite-20` | Tags `<GearBox>`/`<GearPick>` links; untagged they stay plain outbound links |
+| `BUTTONDOWN_API_KEY` | [Buttondown](https://buttondown.com) → Settings → API | Newsletter signups (article CTA + footer form) and the weekly digest |
+
+Ad slots lazy-load (the ad request fires only when the unit nears the
+viewport), affiliate links always carry `rel="sponsored nofollow"` plus the FTC
+disclosure, and `/sponsor` is a ready-made media-kit page for direct sponsors.
+
+---
+
 ## Deploy
 
 ### Scheduling — GitHub Actions (the hourly tick)

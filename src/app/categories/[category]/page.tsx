@@ -27,8 +27,14 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-  const posts = (await listPosts()).filter((p) => p.frontmatter.category === category);
+  const all = await listPosts();
+  const posts = all.filter((p) => p.frontmatter.category === category);
   if (posts.length === 0) notFound();
+
+  // Cross-link the sibling categories that actually have published posts.
+  const others = Array.from(new Set(all.map((p) => p.frontmatter.category))).filter(
+    (c) => c !== category
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
@@ -36,6 +42,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         <div className="text-xs uppercase tracking-[0.3em] text-muted">Category</div>
         <h1 className="mt-2 font-display text-5xl font-black capitalize">{category}</h1>
         <p className="mt-2 text-muted">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+        {others.length > 0 && (
+          <nav className="mt-4 flex flex-wrap items-center gap-3 text-xs uppercase tracking-widest text-muted">
+            <span>Also tuned to:</span>
+            {others.map((c) => (
+              <Link key={c} href={`/categories/${c}`} className="border border-ink/30 px-2 py-1 capitalize hover:border-accent hover:text-accent transition-colors">
+                {c}
+              </Link>
+            ))}
+          </nav>
+        )}
       </div>
       <ul className="divide-y divide-ink/20">
         {posts.map((p) => (
