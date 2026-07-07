@@ -7,8 +7,22 @@ import { mdxComponents } from '@/components/mdx';
 import { articleJsonLd, faqJsonLd, breadcrumbJsonLd, SITE_URL, SITE_NAME } from '@/lib/structured-data';
 import { AdSlot } from '@/components/AdSlot';
 import { NewsletterCTA } from '@/components/NewsletterCTA';
-import { ADSENSE_SLOT_IN_ARTICLE } from '@/lib/ads';
+import { ADSENSE_CLIENT, ADSENSE_SLOT_IN_ARTICLE, ADSENSE_SLOT_MID_ARTICLE } from '@/lib/ads';
 import { SignalVisual } from '@/components/SignalVisual';
+
+/**
+ * Split the MDX body at the top-level "## How to think about it" heading so a
+ * mid-article ad can sit between two independently-compilable halves (the MDX
+ * contract guarantees every component opened before that heading is closed
+ * before it). Hand-written editorial posts without the heading — or deploys
+ * with no mid-article slot configured — render the body in one piece.
+ */
+function splitForMidArticleAd(body: string): [string] | [string, string] {
+  if (!ADSENSE_CLIENT || !ADSENSE_SLOT_MID_ARTICLE) return [body];
+  const m = body.match(/^## How to think about it\s*$/m);
+  if (!m || m.index === undefined || m.index === 0) return [body];
+  return [body.slice(0, m.index), body.slice(m.index)];
+}
 
 export const revalidate = 300;
 
@@ -111,10 +125,30 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <SignalVisual category={frontmatter.category} index={frontmatter.title.length % 7} compact />
       </div>
 
-      {/* Body */}
-      <div className="prose-editorial">
-        <MDXRemote source={body} components={mdxComponents} />
-      </div>
+      {/* Body — optionally split around a mid-article ad unit */}
+      {(() => {
+        const parts = splitForMidArticleAd(body);
+        return (
+          <>
+            <div className="prose-editorial">
+              <MDXRemote source={parts[0]} components={mdxComponents} />
+            </div>
+            {parts.length === 2 && (
+              <>
+                <AdSlot
+                  slot={ADSENSE_SLOT_MID_ARTICLE}
+                  format="fluid"
+                  layout="in-article"
+                  className="my-10 block text-center"
+                />
+                <div className="prose-editorial">
+                  <MDXRemote source={parts[1]} components={mdxComponents} />
+                </div>
+              </>
+            )}
+          </>
+        );
+      })()}
 
       {/* In-article ad (renders only when AdSense is configured) */}
       <AdSlot

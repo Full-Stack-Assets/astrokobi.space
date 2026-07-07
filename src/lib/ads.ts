@@ -10,3 +10,9 @@ export const ADSENSE_CLIENT =
 
 export const ADSENSE_SLOT_IN_ARTICLE = process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE;
 export const ADSENSE_SLOT_FOOTER = process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER;
+// Mid-article unit: rendered between the analysis and FAQ sections of a post
+// (the body is split at the "## How to think about it" heading). Unset → the
+// body renders in one piece, exactly as before.
+export const ADSENSE_SLOT_MID_ARTICLE = process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID_ARTICLE;
+// Listing unit: shown on the homepage between the lead story and the grid.
+export const ADSENSE_SLOT_LISTING = process.env.NEXT_PUBLIC_ADSENSE_SLOT_LISTING;
