@@ -1,8 +1,7 @@
 name: Backfill Long-Form Articles
 
-# One-time, manually-triggered batch: runs scripts/backfill-articles.ts, which
-# generates 18 long-form (roughly double-length) evergreen posts dated to the
-# specific historical days that had 0 or 1 posts, then commits the result.
+# One-time, manually-triggered batch: runs the existing seed/backfill runner
+# with a fixed 18-topic limit, then commits the generated content.
 # Mirrors the Seed Backfill workflow's structure — runs in CI so it uses the
 # repo's existing Actions secrets, and pushes to whatever ref triggered it
 # (so a dispatch against a feature branch lands the content on that branch
@@ -44,7 +43,7 @@ jobs:
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
           # Optional: hero images (falls back to keyless Openverse, then none).
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: npx tsx scripts/backfill-articles.ts
+        run: npx tsx scripts/seed.ts --limit=18 --interval-hours=24 --delay=2000
 
       - name: Commit and push
         run: |
