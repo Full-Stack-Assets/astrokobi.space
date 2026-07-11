@@ -60,17 +60,17 @@ export function SubscribeForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           aria-label="Email address"
-          className="min-w-0 flex-1 border border-ink/30 bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          className="min-w-0 flex-1 rounded-md border border-white/20 bg-white/[0.04] px-3 py-2 text-sm text-paper placeholder:text-muted focus:border-accent focus:outline-none"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="border border-accent bg-accent px-4 py-2 text-sm font-semibold text-paper transition-colors hover:bg-transparent hover:text-accent disabled:opacity-60"
+          className="rounded-md border border-accent bg-accent px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-transparent hover:text-accent disabled:opacity-60"
         >
           {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
         </button>
       </form>
-      {status === 'error' && <p className="mt-2 text-xs text-ink/60">{message}</p>}
+      {status === 'error' && <p className="mt-2 text-xs text-muted">{message}</p>}
     </div>
   );
 }

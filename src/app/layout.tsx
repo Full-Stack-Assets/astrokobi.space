@@ -75,8 +75,8 @@ function Header() {
   const words = siteConfig.name.split(' ');
   const last = words.pop();
   return (
-    <header className="relative z-20 border-b border-white/15">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-ink/60 backdrop-blur-xl supports-[backdrop-filter]:bg-ink/50">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
         <Link href="/" className="group">
           <div className="font-display text-xl font-semibold uppercase tracking-[0.12em] leading-none text-paper">{words.join(' ')} <span className="text-accent">{last}</span></div>
         </Link>
@@ -85,7 +85,7 @@ function Header() {
             <Link key={c} href={`/categories/${c}`} className="hidden transition-colors hover:text-accent sm:block">{navLabel(c)}</Link>
           ))}
           <Link href="/about" className="transition-colors hover:text-accent">About</Link>
-          <a href="/feed.xml" className="border border-white/20 px-3 py-2 text-paper transition-colors hover:border-accent hover:text-accent">RSS ↗</a>
+          <a href="/feed.xml" className="rounded-full border border-white/20 px-3.5 py-2 text-paper transition-colors hover:border-accent hover:text-accent">RSS ↗</a>
         </nav>
       </div>
     </header>
@@ -128,7 +128,7 @@ function Footer() {
           corrections are welcome.
         </p>
         {shouldDisclose() && (
-          <div className="mt-4 max-w-3xl border-t border-ink/10 pt-4">
+          <div className="mt-4 max-w-3xl border-t border-white/10 pt-4">
             <AffiliateDisclosure scope="site" />
           </div>
         )}

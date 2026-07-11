@@ -20,7 +20,7 @@ function isAvailabilityError(msg: string): boolean {
 const MAX_GENERATION_ATTEMPTS = 5;
 
 /** HTTP statuses worth retrying — rate limits and transient upstream outages
- *  (Gemini's free tier returns 503 "UNAVAILABLE" under load). Client errors like
+ *  (free-tier LLM endpoints can return 503 "overloaded" under load). Client errors like
  *  400/401/403 are deliberately absent: retrying them just fails identically. */
 const RETRYABLE_STATUS = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
 
@@ -197,6 +197,18 @@ export async function generate(bundle: ResearchBundle): Promise<GeneratedPost> {
       // so the next try lands after the demand spike rather than during it.
       if (!isTransient(err)) {
         throw new Error(`LLM generation aborted on a non-retryable error: ${lastError}`);
+      }
+      // Availability trouble on the primary (429/5xx/overloaded): switch to the
+      // backup provider for the remaining attempts instead of hammering a model
+      // that is telling us it's down.
+      if (!failedOver && FALLBACK_LLM && fallbackKey && isAvailabilityError(lastError)) {
+        failedOver = true;
+        provider = FALLBACK_LLM;
+        providerKey = fallbackKey;
+        console.warn(
+          `[generate] ${PRIMARY_LLM.model} unavailable (${lastError.slice(0, 140)}) — failing over to ${FALLBACK_LLM.model}`
+        );
+        continue;
       }
       if (attempt < MAX_GENERATION_ATTEMPTS) {
         const wait = backoffMs(attempt);

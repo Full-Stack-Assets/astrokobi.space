@@ -13,7 +13,7 @@ identity, metadata, accent colors, and editorial collection at build time.
 
 A self-hosted, near-zero-cost space &amp; astronomy blog that writes itself. A scheduled job runs every hour, picks the highest-signal story from seven sources, researches it, writes a structured MDX post, and commits it to GitHub. The Next.js site auto-deploys.
 
-**Stack:** Next.js 15 · TinaCMS · Google Gemini (free tier) · Brave Search · Pexels · GitHub Contents API · Vercel.
+**Stack:** Next.js 15 · TinaCMS · Groq (free tier) · Brave Search · Pexels · GitHub Contents API · Vercel.
 
 **Monthly cost at steady state:** ~$0.
 
@@ -26,7 +26,7 @@ A self-hosted, near-zero-cost space &amp; astronomy blog that writes itself. A s
 ```
  ┌─ Reddit ───────┐
  │ Hacker News    │
- │ DEV.to         │──▶ score ──▶ dedup ──▶ winner ──▶ research ──▶ Gemini ──▶ MDX ──▶ git commit ──▶ deploy
+ │ DEV.to         │──▶ score ──▶ dedup ──▶ winner ──▶ research ──▶ Groq ──▶ MDX ──▶ git commit ──▶ deploy
  │ RSS feeds      │   (pop + engagement + recency)    (Brave + scrape     (strict JSON
  │ YouTube        │                                    + YT transcripts)   contract)
  │ Brave News     │
@@ -63,14 +63,14 @@ cp .env.example .env.local
 
 | Key | Where | Free tier |
 |---|---|---|
-| `GEMINI_API_KEY` | https://aistudio.google.com/apikey | ~1,500 requests/day — comfortably covers an hourly post |
+| `GROQ_API_KEY` | https://console.groq.com/keys | free tier — comfortably covers an hourly post |
 | `BRAVE_API_KEY` | https://api.search.brave.com/app/keys | 2,000 queries/month on the free plan |
 | `PEXELS_API_KEY` | https://www.pexels.com/api/new/ | Unlimited for dev use (`imageProvider: 'openverse'` is keyless) |
 | `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | https://www.reddit.com/prefs/apps (create a "script" app) | Free |
 | `GITHUB_TOKEN` | github.com → Settings → Developer settings → Fine-grained PAT | Scope: **Contents: Read/Write** on the blog repo only |
 | `CRON_SECRET` | `openssl rand -hex 32` | — |
 
-Fill them into `.env.local` along with `GITHUB_OWNER` / `GITHUB_REPO` / `GITHUB_BRANCH`. Most keys are optional — any unset source is simply skipped. The **LLM key is the only hard requirement**, and its env var name must match `llm.apiKeyEnv` in `src/site.config.ts` (`GEMINI_API_KEY` by default; swap to Groq/OpenRouter via the commented examples in that file).
+Fill them into `.env.local` along with `GITHUB_OWNER` / `GITHUB_REPO` / `GITHUB_BRANCH`. Most keys are optional — any unset source is simply skipped. The **LLM key is the only hard requirement**, and its env var name must match `llm.apiKeyEnv` in `src/site.config.ts` (`GROQ_API_KEY` by default; swap to OpenRouter via the commented examples in that file).
 
 > **⚠️ Security note:** Never commit `.env.local` or any file containing real API keys. `.env.local` is already in `.gitignore`. Use `.env.example` as a template with placeholder values only. See [`SECURITY_REMEDIATION.md`](SECURITY_REMEDIATION.md).
 
@@ -105,7 +105,7 @@ npm run seed -- --limit=10     # write the first 10 not-yet-covered topics
 npm run seed                   # write every not-yet-covered topic
 ```
 
-It needs `GEMINI_API_KEY` and `BRAVE_API_KEY` (evergreen topics have no source
+It needs `GROQ_API_KEY` and `BRAVE_API_KEY` (evergreen topics have no source
 URL of their own, so research relies on web search). It's idempotent — already
 covered topics are skipped via the topic log, so you can stop and re-run — and it
 spreads post dates backward over recent days (`--interval-days`) so the catalog
@@ -120,7 +120,7 @@ the list.
 
 The hourly schedule lives in **`.github/workflows/generate.yml`**, which runs at the top of every hour (`cron: '0 * * * *'`), executes the pipeline with `npx tsx scripts/run-local.ts`, and commits any new post straight to the repo. No serverless CPU limits, free logs, and the push triggers your host to redeploy. This is the scheduler — your host below is just for serving the site.
 
-Add the pipeline secrets (`GEMINI_API_KEY`, `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`) under **Settings → Secrets and variables → Actions**. The workflow has `contents: write` and a `concurrency` group so a slow run never overlaps the next tick, plus a union merge driver (`scripts/merge-topic-log.mjs`) so concurrent appends to the topic log auto-merge instead of conflicting. Use the **Run workflow** button (`workflow_dispatch`) to trigger a one-off run.
+Add the pipeline secrets (`GROQ_API_KEY`, `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`) under **Settings → Secrets and variables → Actions**. The workflow has `contents: write` and a `concurrency` group so a slow run never overlaps the next tick, plus a union merge driver (`scripts/merge-topic-log.mjs`) so concurrent appends to the topic log auto-merge instead of conflicting. Use the **Run workflow** button (`workflow_dispatch`) to trigger a one-off run.
 
 > **Why not a Vercel cron?** Vercel's Hobby (free) plan caps cron jobs at **once per day**, so an hourly tick there would be throttled. To stay at $0, scheduling lives in GitHub Actions. On Vercel **Pro** you can instead point an hourly cron at `/api/cron/generate` — the route already handles `Authorization: Bearer $CRON_SECRET`. Don't run both at once or you'll generate twice an hour.
 
@@ -203,7 +203,7 @@ Dedup uses a sorted-token fingerprint of the title, so "JWST spots new galaxy" a
 
 **"no research content scrapable"** — the winner's URL and all Brave results failed to scrape (timeouts, 403s, JS-only pages). The pipeline skips gracefully; try again next tick.
 
-**LLM rate limit** — Gemini's free tier (~1,500 req/day) comfortably covers one post/hour, but if you're iterating locally, just wait a moment between runs.
+**LLM rate limit** — Groq's free tier comfortably covers one post/hour, but if you're iterating locally, just wait a moment between runs.
 
 **Cloudflare Pages timeouts** — see the hosting note above. Pages Functions can't run this pipeline end-to-end; let the GitHub Action generate.
 
@@ -214,7 +214,7 @@ Dedup uses a sorted-token fingerprint of the title, so "JWST spots new galaxy" a
 - **Add a source:** drop a new file in `src/lib/sources/`, export a function returning `RawItem[]`, and add it to the `Promise.all` in `pipeline.ts`.
 - **Tune the tone:** edit `SYSTEM_PROMPT` in `generate.ts`. The zod schema will catch anything structurally broken.
 - **Change the niche / sources:** adjust `audience`, `categories`, and `sources` (`subreddits`, `rssFeeds`, `braveQueries`) in `src/site.config.ts`.
-- **Swap the LLM:** edit the `llm` block in `src/site.config.ts` (any OpenAI-compatible endpoint — Gemini, Groq, OpenRouter), and set the matching `apiKeyEnv` secret.
+- **Swap the LLM:** edit the `llm` block in `src/site.config.ts` (any OpenAI-compatible endpoint — Groq, OpenRouter, Gemini), and set the matching `apiKeyEnv` secret.
 - **Change the cadence:** edit the `cron` in `.github/workflows/generate.yml` (e.g. `0 */2 * * *` for every two hours, `0 12 * * *` for daily).
 
 ---
