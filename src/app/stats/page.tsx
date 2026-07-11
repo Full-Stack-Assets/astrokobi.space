@@ -45,10 +45,11 @@ export default async function StatsPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       {/* Header */}
-      <div className="mb-12 border-b border-white/15 pb-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-muted">Meta</div>
-        <h1 className="mt-2 font-display text-5xl font-black">Stats</h1>
-        <p className="mt-2 text-muted">
+      <div className="relative mb-12 border-b border-white/15 pb-6">
+        <div className="aurora aurora--soft" aria-hidden />
+        <div className="eyebrow text-accent">Telemetry · Meta</div>
+        <h1 className="gradient-text mt-3 font-display text-5xl font-semibold tracking-[-.03em] sm:text-6xl">Stats</h1>
+        <p className="mt-3 text-muted">
           Pipeline telemetry and content breakdown.
         </p>
       </div>
@@ -79,7 +80,7 @@ export default async function StatsPage() {
                   </Link>
                   <div className="flex-1 h-6 bg-white/[0.05] relative overflow-hidden">
                     <div
-                      className="absolute inset-y-0 left-0 bg-accent/80"
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent2/80 to-accent/90"
                       style={{ width: `${pct}%`, minWidth: '1rem' }}
                     />
                     <span className="absolute inset-y-0 right-2 flex items-center text-[11px] font-mono text-muted">
@@ -123,7 +124,7 @@ export default async function StatsPage() {
             to populate.
           </p>
         ) : (
-          <div className="mt-6 divide-y divide-ink/10">
+          <div className="mt-6 divide-y divide-white/10">
             {log.topics
               .slice(-25)
               .reverse()
@@ -173,7 +174,7 @@ export default async function StatsPage() {
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="glass-card p-5">
-      <div className="font-display text-3xl font-black text-accent">{value}</div>
+      <div className="gradient-text font-display text-3xl font-semibold">{value}</div>
       <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted">
         {label}
       </div>

@@ -2,15 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 /* ── Design tokens ──────────────────────────────────────────────
    Deep-space editorial palette: near-black cosmic ground, violet→cyan
-   accent gradient. Per-variant accents override via [data-site]. */
+   accent gradient. Per-variant accents override via [data-site].
+   Fonts (--font-display: Fraunces, --font-body: Inter, --font-mono:
+   Space Mono) are self-hosted via next/font/google and set as CSS
+   variables on <html> in layout.tsx — no @import here. */
 :root {
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Manrope', system-ui, sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, monospace;
   --color-paper: #eef1f8;
   --color-muted: #939aab;
   --color-accent: #7be6ff;      /* cyan */
@@ -26,10 +24,12 @@
 html { background: var(--color-ground); color: #eef1f8; font-family: var(--font-body); scroll-behavior: smooth; }
 body {
   min-height: 100vh;
+  /* Nebula glows: violet crown, cyan drift, magenta undertow. */
   background:
-    radial-gradient(ellipse 80rem 44rem at 15% -8%, rgba(124, 96, 255, 0.13), transparent),
-    radial-gradient(ellipse 60rem 36rem at 92% 22%, rgba(94, 222, 255, 0.07), transparent),
-    radial-gradient(ellipse 70rem 50rem at 50% 115%, rgba(147, 90, 255, 0.08), transparent),
+    radial-gradient(ellipse 80rem 44rem at 15% -8%, rgba(124, 96, 255, 0.17), transparent),
+    radial-gradient(ellipse 60rem 36rem at 92% 22%, rgba(94, 222, 255, 0.09), transparent),
+    radial-gradient(ellipse 46rem 30rem at 72% 74%, rgba(217, 70, 239, 0.05), transparent),
+    radial-gradient(ellipse 70rem 50rem at 50% 115%, rgba(147, 90, 255, 0.1), transparent),
     var(--color-ground);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -65,19 +65,28 @@ body::after {
   mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.35) 60%, rgba(0,0,0,.15));
   -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.35) 60%, rgba(0,0,0,.15));
 }
-::selection { background: var(--color-accent); color: var(--color-ground); }
+/* Violet selection — reads as the site's signature even mid-paragraph. */
+::selection { background: var(--color-accent-two); color: var(--color-ground); }
 
 .font-display { font-family: var(--font-display); }
 .eyebrow { font-family: var(--font-mono); font-size: .65rem; text-transform: uppercase; letter-spacing: .25em; color: var(--color-muted); }
 .gradient-text {
   color: transparent;
-  background: linear-gradient(100deg, var(--color-paper) 0%, var(--color-accent-two) 42%, var(--color-accent) 90%);
+  background: linear-gradient(
+    105deg,
+    var(--color-paper) 0%,
+    color-mix(in srgb, var(--color-accent-two) 88%, white) 34%,
+    var(--color-accent-two) 52%,
+    var(--color-accent) 78%,
+    color-mix(in srgb, var(--color-accent) 60%, white) 100%
+  );
   background-clip: text;
   -webkit-background-clip: text;
 }
 
 /* ── Glass surfaces ─────────────────────────────────────────── */
 .glass-card {
+  position: relative;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
@@ -85,17 +94,71 @@ body::after {
   border-radius: 1rem;
   transition: transform .35s cubic-bezier(.2, .8, .25, 1), border-color .35s ease, box-shadow .35s ease, background-color .35s ease;
 }
+/* Violet→cyan gradient border, revealed on hover. Painted by a masked
+   pseudo-element ring so it works with `overflow:hidden` cards and never
+   disturbs layout; sits above content but is click-transparent. */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent-two) 75%, transparent),
+    transparent 42%,
+    transparent 58%,
+    color-mix(in srgb, var(--color-accent) 65%, transparent)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+}
+.glass-card:hover::after { opacity: 1; }
 .glass-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.045);
   box-shadow: var(--glass-glow);
 }
 @media (prefers-reduced-motion: reduce) {
   .glass-card, .glass-card:hover { transform: none; transition: none; }
+  .glass-card::after { transition: none; }
 }
 /* Hairline accent gradient rule */
 .accent-rule { height: 1px; background: linear-gradient(90deg, var(--color-accent-two), var(--color-accent), transparent); }
+
+/* ── Aurora mesh ────────────────────────────────────────────────
+   Layered, heavily-blurred radial fields in the accent hues that drift
+   slowly behind hero sections. Pure CSS, no assets; parked (static)
+   under prefers-reduced-motion. Parent must be position:relative. */
+.aurora {
+  position: absolute;
+  inset: -18% -12% auto;
+  height: 130%;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(64px);
+  opacity: .5;
+  background:
+    radial-gradient(42rem 24rem at 16% 28%, color-mix(in srgb, var(--color-accent-two) 34%, transparent), transparent 62%),
+    radial-gradient(34rem 22rem at 78% 12%, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 60%),
+    radial-gradient(28rem 18rem at 55% 72%, rgba(217, 70, 239, 0.14), transparent 65%);
+  animation: aurora-drift 28s ease-in-out infinite alternate;
+}
+.aurora--soft { opacity: .32; }
+@keyframes aurora-drift {
+  from { transform: translate3d(-2.5%, 0, 0) rotate(-1.5deg) scale(1); }
+  to   { transform: translate3d(2.5%, 3%, 0) rotate(1.5deg) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora { animation: none; }
+}
 
 /* ── Signal visual (procedural hero art) ────────────────────── */
 .signal-visual {

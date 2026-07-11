@@ -11,18 +11,28 @@ type LlmProvider = { endpoint: string; model: string; apiKeyEnv: string };
 const PRIMARY_LLM: LlmProvider = siteConfig.llm;
 const FALLBACK_LLM: LlmProvider | undefined = (siteConfig as { llmFallback?: LlmProvider }).llmFallback;
 
-/** A transient provider error worth failing over to the backup LLM for. */
+/** A transient provider error worth failing over to the backup LLM for.
+ *  Includes Groq's 413 "request too large": the free tier admits requests by
+ *  input + requested output tokens against the model's TPM cap, so an
+ *  over-budget request fails identically on every retry against the same
+ *  model — but succeeds on the fallback, which has a much higher cap. */
 function isAvailabilityError(msg: string): boolean {
-  return /API error (?:429|5\d\d)\b/.test(msg) || /overloaded|unavailable|high demand/i.test(msg);
+  return (
+    /API error (?:413|429|5\d\d)\b/.test(msg) ||
+    /overloaded|unavailable|high demand|too large|Request too large|413/i.test(msg)
+  );
 }
 
 /** How many times to ask the model before giving up on a structurally valid post. */
 const MAX_GENERATION_ATTEMPTS = 5;
 
 /** HTTP statuses worth retrying — rate limits and transient upstream outages
- *  (free-tier LLM endpoints can return 503 "overloaded" under load). Client errors like
- *  400/401/403 are deliberately absent: retrying them just fails identically. */
-const RETRYABLE_STATUS = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
+ *  (free-tier LLM endpoints can return 503 "overloaded" under load). 413 is
+ *  retryable only because it triggers failover to the higher-TPM fallback model
+ *  (Groq rejects requests whose input + requested output exceed the model's TPM
+ *  cap). Client errors like 400/401/403 are deliberately absent: retrying them
+ *  just fails identically. */
+const RETRYABLE_STATUS = new Set([408, 409, 413, 425, 429, 500, 502, 503, 504]);
 
 /** Carries the HTTP status of a failed LLM call so the retry loop can tell a
  *  transient outage (back off and retry) from a fatal client error (give up). */
@@ -285,7 +295,10 @@ function fetchLlm(provider: LlmProvider, key: string, userPrompt: string): Promi
     body: JSON.stringify({
       model: provider.model,
       temperature: 0.5,
-      max_tokens: 8192,
+      // Groq's free tier counts input + requested output tokens at admission
+      // against an 8K TPM cap for gpt-oss models; 3584 leaves ~4K of headroom
+      // for the prompt so a single request fits under the cap.
+      max_tokens: 3584,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -333,14 +346,14 @@ function buildUserPrompt(bundle: ResearchBundle): string {
     .map(
       (a, i) => `### Source ${i + 1}: ${a.title}
 URL: ${a.url}
-${a.content.slice(0, 4000)}`
+${a.content.slice(0, 2400)}`
     )
     .join('\n\n');
 
   const transcriptBlock = transcripts.length
     ? '\n\n## Video transcripts\n' +
       transcripts
-        .map((t) => `### ${t.title}\n${t.text.slice(0, 3000)}`)
+        .map((t) => `### ${t.title}\n${t.text.slice(0, 1600)}`)
         .join('\n\n')
     : '';
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Script from 'next/script';
+import { Fraunces, Inter, Space_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, websiteJsonLd } from '@/lib/structured-data';
@@ -11,6 +12,27 @@ import { ADSENSE_CLIENT, ADSENSE_SLOT_FOOTER } from '@/lib/ads';
 import { siteConfig } from '@/site.config';
 import { shouldDisclose } from '@/lib/affiliate';
 import './globals.css';
+
+// Self-hosted Google fonts via next/font — no render-blocking CSS @import, no
+// external request at runtime. Wired as CSS variables on <html> and consumed by
+// Tailwind's font-display/font-body/font-mono and globals.css.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  axes: ['opsz'],
+});
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+});
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 /** Short categories (AI, DIY) read better uppercased; longer ones title-cased. */
 function navLabel(c: string): string {
@@ -47,7 +69,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-site={siteConfig.key}>
+    <html
+      lang="en"
+      data-site={siteConfig.key}
+      className={`${fraunces.variable} ${inter.variable} ${spaceMono.variable}`}
+    >
       <body className="relative overflow-x-hidden">
         {ADSENSE_CLIENT && (
           <Script
