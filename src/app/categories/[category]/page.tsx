@@ -17,7 +17,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
-      <div className="mb-12 border-b-2 border-ink pb-6">
+      <div className="mb-12 border-b border-white/15 pb-6">
         <div className="text-xs uppercase tracking-[0.3em] text-muted">Category</div>
         <h1 className="mt-2 font-display text-5xl font-black capitalize">{category}</h1>
         <p className="mt-2 text-muted">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
@@ -29,7 +29,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
               <h2 className="font-display text-2xl font-semibold group-hover:text-accent transition-colors">
                 {p.frontmatter.title}
               </h2>
-              <p className="mt-1 text-ink/70">{p.frontmatter.description}</p>
+              <p className="mt-1 text-muted">{p.frontmatter.description}</p>
               <div className="mt-2 text-xs uppercase tracking-widest text-muted">
                 {new Date(p.frontmatter.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 {' · '}{p.readingTimeMin} min

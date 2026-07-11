@@ -19,9 +19,9 @@ const SPONSOR_EMAIL = `sponsor@${(() => {
 
 function Row({ product, detail, price }: { product: string; detail: string; price: string }) {
   return (
-    <tr className="border-t border-ink/15">
-      <td className="py-3 pr-4 align-top font-display font-semibold text-ink">{product}</td>
-      <td className="py-3 pr-4 align-top text-sm text-ink/70">{detail}</td>
+    <tr className="border-t border-white/10">
+      <td className="py-3 pr-4 align-top font-display font-semibold text-paper">{product}</td>
+      <td className="py-3 pr-4 align-top text-sm text-muted">{detail}</td>
       <td className="py-3 align-top text-right font-mono text-sm whitespace-nowrap text-accent">{price}</td>
     </tr>
   );
@@ -30,10 +30,10 @@ function Row({ product, detail, price }: { product: string; detail: string; pric
 export default function SponsorPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
-      <div className="mb-10 border-b-2 border-ink pb-6">
+      <div className="mb-10 border-b border-white/15 pb-6">
         <div className="text-xs uppercase tracking-[0.3em] text-muted">Media kit</div>
         <h1 className="mt-2 font-display text-5xl font-black">Sponsor {siteConfig.name}</h1>
-        <p className="mt-4 font-display text-xl leading-snug text-ink/70">
+        <p className="mt-4 font-display text-xl leading-snug text-muted">
           Put your brand in front of {siteConfig.audience} — in a clean, single-sponsor
           format that readers actually trust.
         </p>

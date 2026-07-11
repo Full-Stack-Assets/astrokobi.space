@@ -18,7 +18,7 @@ export default async function HomePage() {
           {rest.length > 0 && (
             <section className="mt-24">
               <SectionRule label="The field notes" />
-              <div className="mt-7 grid border-l border-t border-white/15 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {rest.map((post, index) => <PostCard key={post.slug} post={post} index={index + 1} />)}
               </div>
             </section>
@@ -31,7 +31,8 @@ export default async function HomePage() {
 
 function Masthead({ postCount }: { postCount: number }) {
   return (
-    <section className="mb-14 grid min-h-[46vh] items-end gap-10 border-b border-white/15 pb-12 lg:grid-cols-[1fr_auto]">
+    <section className="relative mb-14 grid min-h-[46vh] items-end gap-10 pb-12 lg:grid-cols-[1fr_auto]">
+      <div className="accent-rule absolute inset-x-0 bottom-0" aria-hidden />
       <div className="max-w-5xl">
         <div className="eyebrow">Independent journal · {siteConfig.edition}</div>
         <h1 className="mt-6 font-display text-[clamp(4rem,11vw,9.5rem)] font-semibold leading-[0.78] tracking-[-0.075em]">
@@ -66,8 +67,8 @@ type ListedPost = Awaited<ReturnType<typeof listPosts>>[number];
 function LeadStory({ post }: { post: ListedPost }) {
   const { slug, frontmatter, readingTimeMin } = post;
   return (
-    <article className="grid overflow-hidden border border-white/15 lg:grid-cols-[1.18fr_0.82fr]">
-      <Link href={`/blog/${slug}`} className="min-h-[420px] overflow-hidden border-b border-white/15 lg:border-b-0 lg:border-r">
+    <article className="glass-card grid overflow-hidden lg:grid-cols-[1.18fr_0.82fr]">
+      <Link href={`/blog/${slug}`} className="min-h-[420px] overflow-hidden border-b border-white/10 lg:border-b-0 lg:border-r">
         <SignalVisual category={frontmatter.category} />
       </Link>
       <div className="flex flex-col justify-center p-7 sm:p-12">
@@ -89,8 +90,8 @@ function LeadStory({ post }: { post: ListedPost }) {
 function PostCard({ post, index }: { post: ListedPost; index: number }) {
   const { slug, frontmatter, readingTimeMin } = post;
   return (
-    <article className="group flex flex-col border-b border-r border-white/15 p-5 transition-colors hover:bg-white/[0.025] sm:p-6">
-      <Link href={`/blog/${slug}`} className="mb-7 block aspect-[4/3] overflow-hidden">
+    <article className="glass-card group flex flex-col overflow-hidden p-5 sm:p-6">
+      <Link href={`/blog/${slug}`} className="mb-7 block aspect-[4/3] overflow-hidden rounded-lg border border-white/10">
         <SignalVisual category={frontmatter.category} index={index} compact />
       </Link>
       <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-accent">

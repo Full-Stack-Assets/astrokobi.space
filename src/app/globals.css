@@ -2,45 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+/* ── Design tokens ──────────────────────────────────────────────
+   Deep-space editorial palette: near-black cosmic ground, violet→cyan
+   accent gradient. Per-variant accents override via [data-site]. */
 :root {
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'Manrope', system-ui, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, monospace;
   --color-paper: #eef1f8;
-  --color-muted: #89909e;
-  --color-accent: #9dffe5;
-  --color-accent-two: #7f8cff;
+  --color-muted: #939aab;
+  --color-accent: #7be6ff;      /* cyan */
+  --color-accent-two: #a78bfa;  /* violet */
+  --color-ground: #06070c;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-glow: 0 24px 60px -28px rgba(122, 108, 255, 0.35), 0 8px 30px -18px rgba(0, 0, 0, 0.8);
 }
 [data-site='astrokobi-online'] { --color-accent: #ff9b7a; --color-accent-two: #b48cff; }
 [data-site='astrokobi-site'] { --color-accent: #f4ff74; --color-accent-two: #49d6ff; }
 
-html { background: #07090e; color: #eef1f8; font-family: var(--font-body); scroll-behavior: smooth; }
+html { background: var(--color-ground); color: #eef1f8; font-family: var(--font-body); scroll-behavior: smooth; }
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 5%, rgba(90, 104, 255, .11), transparent 28rem),
-    radial-gradient(circle at 88% 30%, rgba(108, 255, 220, .06), transparent 24rem),
-    #07090e;
+    radial-gradient(ellipse 80rem 44rem at 15% -8%, rgba(124, 96, 255, 0.13), transparent),
+    radial-gradient(ellipse 60rem 36rem at 92% 22%, rgba(94, 222, 255, 0.07), transparent),
+    radial-gradient(ellipse 70rem 50rem at 50% 115%, rgba(147, 90, 255, 0.08), transparent),
+    var(--color-ground);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+/* Film grain — keeps the black from feeling flat. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
-  opacity: .2;
+  opacity: .16;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitchTiles'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
 }
-::selection { background: #9dffe5; color: #07090e; }
-.font-display { font-family: var(--font-display); }
-.eyebrow { font-family: var(--font-mono); font-size: .65rem; text-transform: uppercase; letter-spacing: .25em; color: #89909e; }
-.gradient-text { color: transparent; background: linear-gradient(90deg, var(--color-paper) 5%, var(--color-accent) 55%, var(--color-accent-two)); background-clip: text; -webkit-background-clip: text; }
+/* Starfield — pure CSS: layered radial-gradient "stars" tiled at offset
+   periods so the repeat never reads as a grid. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 24%, rgba(255,255,255,.85) 45%, transparent 55%),
+    radial-gradient(1px 1px at 68% 9%, rgba(255,255,255,.6) 45%, transparent 55%),
+    radial-gradient(1.5px 1.5px at 42% 68%, rgba(190,215,255,.7) 45%, transparent 55%),
+    radial-gradient(1px 1px at 87% 51%, rgba(255,255,255,.5) 45%, transparent 55%),
+    radial-gradient(1px 1px at 29% 88%, rgba(210,190,255,.55) 45%, transparent 55%),
+    radial-gradient(2px 2px at 76% 82%, rgba(255,255,255,.4) 40%, transparent 60%),
+    radial-gradient(1px 1px at 55% 37%, rgba(255,255,255,.45) 45%, transparent 55%);
+  background-size: 540px 540px, 420px 420px, 610px 610px, 480px 480px, 570px 570px, 700px 700px, 390px 390px;
+  opacity: .5;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.35) 60%, rgba(0,0,0,.15));
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.35) 60%, rgba(0,0,0,.15));
+}
+::selection { background: var(--color-accent); color: var(--color-ground); }
 
+.font-display { font-family: var(--font-display); }
+.eyebrow { font-family: var(--font-mono); font-size: .65rem; text-transform: uppercase; letter-spacing: .25em; color: var(--color-muted); }
+.gradient-text {
+  color: transparent;
+  background: linear-gradient(100deg, var(--color-paper) 0%, var(--color-accent-two) 42%, var(--color-accent) 90%);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* ── Glass surfaces ─────────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  transition: transform .35s cubic-bezier(.2, .8, .25, 1), border-color .35s ease, box-shadow .35s ease, background-color .35s ease;
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: var(--glass-glow);
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-card, .glass-card:hover { transform: none; transition: none; }
+}
+/* Hairline accent gradient rule */
+.accent-rule { height: 1px; background: linear-gradient(90deg, var(--color-accent-two), var(--color-accent), transparent); }
+
+/* ── Signal visual (procedural hero art) ────────────────────── */
 .signal-visual {
-  --signal-primary: #9dffe5;
-  --signal-secondary: #7f8cff;
+  --signal-primary: var(--color-accent);
+  --signal-secondary: var(--color-accent-two);
   --signal-rotation: 8deg;
   position: relative;
   width: 100%;
@@ -56,18 +116,57 @@ body::before {
 .signal-orbit--two { width: 32%; aspect-ratio: 1; border-color: var(--signal-secondary); }
 .signal-core { position: absolute; left: 50%; top: 50%; width: 12%; aspect-ratio: 1; border-radius: 50%; background: var(--signal-primary); transform: translate(-50%, -50%); box-shadow: 0 0 25px var(--signal-primary), 0 0 90px color-mix(in srgb, var(--signal-primary) 45%, transparent); }
 .signal-scan { position: absolute; left: 50%; top: 50%; width: 46%; height: 1px; background: linear-gradient(90deg, var(--signal-primary), transparent); transform-origin: left center; animation: scan 12s linear infinite; }
-.signal-coordinate { position: absolute; left: 1.1rem; bottom: 1rem; font-family: var(--font-mono); font-size: .55rem; letter-spacing: .2em; color: color-mix(in srgb, var(--signal-primary) 75%, #89909e); }
+.signal-coordinate { position: absolute; left: 1.1rem; bottom: 1rem; font-family: var(--font-mono); font-size: .55rem; letter-spacing: .2em; color: color-mix(in srgb, var(--signal-primary) 75%, #939aab); }
 @keyframes scan { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .signal-scan { animation: none; transform: rotate(32deg); } }
 
-.prose-editorial { font-size: 1.08rem; line-height: 1.82; color: #c6cad5; }
-.prose-editorial p { margin: 1.4em 0; }
+/* ── Article typography ─────────────────────────────────────── */
+.prose-editorial {
+  max-width: 42.5rem; /* ~68ch comfortable measure */
+  margin-inline: auto;
+  font-size: 1.09rem;
+  line-height: 1.85;
+  color: #c9cdd8;
+}
+.prose-editorial p { margin: 1.45em 0; }
 .prose-editorial strong { color: #eef1f8; font-weight: 600; }
-.prose-editorial h2 { margin: 2.6em 0 .7em; font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 500; line-height: 1.05; letter-spacing: -.035em; color: #eef1f8; }
-.prose-editorial h2::before { content: '↳'; margin-right: .45em; color: #9dffe5; font-family: var(--font-mono); font-size: .65em; }
-.prose-editorial h3 { margin-top: 2em; font-family: var(--font-display); font-size: 1.35rem; color: #eef1f8; }
-.prose-editorial a { color: #9dffe5; text-decoration: underline; text-decoration-color: rgba(157,255,229,.4); text-underline-offset: 4px; }
-.prose-editorial blockquote { margin: 2em 0; border-left: 1px solid #9dffe5; padding: .4em 0 .4em 1.4em; color: #eef1f8; font-family: var(--font-display); font-size: 1.25rem; }
-.prose-editorial ul, .prose-editorial ol { margin: 1.2em 0; padding-left: 1.5rem; }
-.prose-editorial li { margin: .45em 0; }
-.prose-editorial code { border: 1px solid rgba(255,255,255,.12); background: #10141e; padding: .12em .35em; font-family: var(--font-mono); font-size: .86em; color: #9dffe5; }
+.prose-editorial h2 {
+  margin: 2.7em 0 .75em;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.6vw, 2.35rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  color: #eef1f8;
+}
+.prose-editorial h2::before { content: '↳'; margin-right: .45em; color: var(--color-accent); font-family: var(--font-mono); font-size: .62em; vertical-align: .12em; }
+.prose-editorial h3 { margin: 2em 0 .5em; font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; letter-spacing: -.015em; color: #eef1f8; }
+.prose-editorial a { color: var(--color-accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--color-accent) 40%, transparent); text-underline-offset: 4px; transition: text-decoration-color .2s ease; }
+.prose-editorial a:hover { text-decoration-color: var(--color-accent); }
+.prose-editorial blockquote {
+  margin: 2.2em 0;
+  border-left: 2px solid var(--color-accent);
+  padding: .5em 0 .5em 1.5em;
+  color: #eef1f8;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  line-height: 1.5;
+}
+.prose-editorial ul, .prose-editorial ol { margin: 1.25em 0; padding-left: 1.5rem; }
+.prose-editorial li { margin: .5em 0; }
+.prose-editorial li::marker { color: var(--color-accent); }
+.prose-editorial hr { margin: 3em auto; border: 0; height: 1px; width: 60%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); }
+.prose-editorial code {
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: .3rem;
+  background: #10141e;
+  padding: .12em .38em;
+  font-family: var(--font-mono);
+  font-size: .86em;
+  color: var(--color-accent);
+}
+.prose-editorial pre { margin: 1.8em 0; overflow-x: auto; border: 1px solid rgba(255,255,255,.1); border-radius: .75rem; background: #0b0f18; padding: 1.1rem 1.3rem; }
+.prose-editorial pre code { border: 0; background: transparent; padding: 0; color: #c9cdd8; }
+.prose-editorial img { border-radius: .75rem; border: 1px solid rgba(255,255,255,.1); }
+/* Callouts / FAQ / pros-cons blocks may breathe wider than the text measure. */
+.prose-editorial aside, .prose-editorial .prose-breakout { max-width: none; }
