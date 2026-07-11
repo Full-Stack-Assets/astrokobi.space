@@ -209,11 +209,11 @@ note the empty-string guard, since unset CI secrets arrive as `""`).
 - **`src/site.config.ts`** — the one file that defines the site: branding,
   `audience` (goes into the writer prompt), `categories`/`navCategories`,
   `sources` (subreddits / RSS feeds / Brave queries), `adsenseClient`, the `llm`
-  block (OpenAI-compatible `endpoint` + `model` + `apiKeyEnv`; default **Google
-  Gemini**), and `imageProvider` (`pexels` | `openverse` | `none`).
+  block (OpenAI-compatible `endpoint` + `model` + `apiKeyEnv`; default
+  **Groq**), and `imageProvider` (`pexels` | `openverse` | `none`).
 - **Secrets** live in `.env.local` locally and GitHub Actions secrets in CI.
   `.env.example` is the full annotated list. The LLM key name **must match**
-  `siteConfig.llm.apiKeyEnv` (default `GEMINI_API_KEY`). Most source/integration
+  `siteConfig.llm.apiKeyEnv` (default `GROQ_API_KEY`). Most source/integration
   keys are optional — an unset one is skipped, not fatal.
 - **Never commit real keys.** `.env*` is gitignored; `.env.example` holds
   placeholders only. See `SECURITY_REMEDIATION.md`.

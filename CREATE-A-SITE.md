@@ -23,8 +23,8 @@ This is the only file you must edit. Set:
   pulls from. Pick ones that match the niche; this is what the site writes about.
 - **Ads** — `adsenseClient` (your own `ca-pub-…`), or `''` to stay ad-free.
 - **Engine (optional)** — `llm` (the writer's OpenAI-compatible endpoint, model,
-  and which env var holds its key — defaults to **Google Gemini**; swap to
-  Groq/OpenRouter via the commented examples) and `imageProvider` (`'pexels'`
+  and which env var holds its key — defaults to **Groq**; swap to
+  OpenRouter or any OpenAI-compatible provider via the commented examples) and `imageProvider` (`'pexels'`
   needs a key, `'openverse'` is keyless, `'none'` for no images).
 
 Nothing else needs editing for a basic site.
@@ -42,9 +42,9 @@ For the hourly generator to run, add under **Settings → Secrets and variables 
 Actions**:
 
 - **The LLM key** — required. Its name must match `llm.apiKeyEnv` in
-  `site.config.ts` — **`GEMINI_API_KEY` by default** (`GROQ_API_KEY` /
-  `OPENROUTER_API_KEY` if you switch providers). Google Gemini's free tier
-  (~1,500 requests/day) comfortably covers several sites on one key.
+  `site.config.ts` — **`GROQ_API_KEY` by default** (`OPENROUTER_API_KEY`
+  if you switch providers). Groq's free tier comfortably covers several
+  sites on one key.
 - `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`
   — optional; any unset source is skipped (Brave/Reddit can be dropped entirely,
   and `imageProvider: 'openverse'` needs no image key).

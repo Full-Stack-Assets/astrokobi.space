@@ -37,7 +37,6 @@ jobs:
           # Site identity — must match .env.production / Vercel for astrokobi.space.
           NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
           # LLM key — name must match `llm.apiKeyEnv` in src/site.config.ts.
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Required: these evergreen topics have no source URL, so research

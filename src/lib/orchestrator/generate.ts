@@ -20,7 +20,7 @@ function isAvailabilityError(msg: string): boolean {
 const MAX_GENERATION_ATTEMPTS = 5;
 
 /** HTTP statuses worth retrying — rate limits and transient upstream outages
- *  (Gemini's free tier returns 503 "UNAVAILABLE" under load). Client errors like
+ *  (free-tier LLM endpoints can return 503 "overloaded" under load). Client errors like
  *  400/401/403 are deliberately absent: retrying them just fails identically. */
 const RETRYABLE_STATUS = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
 

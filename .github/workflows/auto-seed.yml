@@ -32,11 +32,11 @@ jobs:
 
       - name: Verify required secrets
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
         run: |
-          if [ -z "${GEMINI_API_KEY}" ]; then
-            echo "GEMINI_API_KEY is not set." >&2
+          if [ -z "${GROQ_API_KEY}" ]; then
+            echo "GROQ_API_KEY is not set. Add it in Settings → Secrets and variables → Actions." >&2
             exit 1
           fi
           if [ -z "${BRAVE_API_KEY}" ]; then
@@ -46,7 +46,6 @@ jobs:
       - name: Run seed (30 topics)
         env:
           NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
