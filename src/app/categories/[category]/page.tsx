@@ -17,12 +17,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
-      <div className="mb-12 border-b border-white/15 pb-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-muted">Category</div>
-        <h1 className="mt-2 font-display text-5xl font-black capitalize">{category}</h1>
-        <p className="mt-2 text-muted">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+      <div className="relative mb-12 border-b border-white/15 pb-6">
+        <div className="aurora aurora--soft" aria-hidden />
+        <div className="eyebrow text-accent">Frequency · Category</div>
+        <h1 className="gradient-text mt-3 font-display text-5xl font-semibold capitalize tracking-[-.03em] sm:text-6xl">{category}</h1>
+        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">{posts.length} {posts.length === 1 ? 'signal' : 'signals'} on record</p>
       </div>
-      <ul className="divide-y divide-ink/20">
+      <ul className="divide-y divide-white/10">
         {posts.map((p) => (
           <li key={p.slug} className="py-6">
             <Link href={`/blog/${p.slug}`} className="group block">

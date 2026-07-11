@@ -89,7 +89,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       />
 
       {/* Article header */}
-      <header className="mb-12 max-w-3xl">
+      <header className="relative mb-12 max-w-3xl">
+        <div className="aurora aurora--soft" aria-hidden />
         <div className="mb-4 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-muted">
           <Link href={`/categories/${frontmatter.category}`} className="border border-accent px-2 py-0.5 text-accent hover:bg-accent hover:text-ink transition-colors">
             {frontmatter.category}
@@ -98,7 +99,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <span>·</span>
           <span>{readingTimeMin} min read</span>
         </div>
-        <h1 className="font-display text-5xl font-medium leading-[.94] tracking-[-.05em] sm:text-7xl">
+        <h1 className="gradient-text font-display text-5xl font-medium leading-[.94] tracking-[-.05em] sm:text-7xl">
           {frontmatter.title}
         </h1>
         <p className="mt-7 text-lg leading-relaxed text-muted sm:text-xl">

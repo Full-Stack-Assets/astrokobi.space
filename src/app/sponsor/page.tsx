@@ -30,9 +30,10 @@ function Row({ product, detail, price }: { product: string; detail: string; pric
 export default function SponsorPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
-      <div className="mb-10 border-b border-white/15 pb-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-muted">Media kit</div>
-        <h1 className="mt-2 font-display text-5xl font-black">Sponsor {siteConfig.name}</h1>
+      <div className="relative mb-10 border-b border-white/15 pb-6">
+        <div className="aurora aurora--soft" aria-hidden />
+        <div className="eyebrow text-accent">Media kit</div>
+        <h1 className="gradient-text mt-3 font-display text-5xl font-semibold tracking-[-.03em]">Sponsor {siteConfig.name}</h1>
         <p className="mt-4 font-display text-xl leading-snug text-muted">
           Put your brand in front of {siteConfig.audience} — in a clean, single-sponsor
           format that readers actually trust.

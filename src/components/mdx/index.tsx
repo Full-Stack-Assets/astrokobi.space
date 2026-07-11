@@ -6,7 +6,7 @@ import { NewsletterCTA } from '@/components/NewsletterCTA';
 type CalloutType = 'takeaway' | 'warning' | 'note';
 
 const CALLOUT_CONFIG: Record<CalloutType, { label: string; bg: string; border: string; accent: string }> = {
-  takeaway: { label: 'Takeaway', bg: 'bg-accent/[0.06]', border: 'border-accent', accent: 'text-accent' },
+  takeaway: { label: 'Takeaway', bg: 'bg-gradient-to-r from-accent2/10 via-transparent to-accent/[0.06]', border: 'border-accent2', accent: 'text-accent' },
   warning:  { label: 'Watch out', bg: 'bg-amber-300/[0.06]', border: 'border-amber-300/80', accent: 'text-amber-200' },
   note:     { label: 'Note', bg: 'bg-white/[0.03]', border: 'border-white/30', accent: 'text-muted' },
 };

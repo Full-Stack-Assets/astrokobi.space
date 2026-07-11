@@ -32,6 +32,7 @@ export default async function HomePage() {
 function Masthead({ postCount }: { postCount: number }) {
   return (
     <section className="relative mb-14 grid min-h-[46vh] items-end gap-10 pb-12 lg:grid-cols-[1fr_auto]">
+      <div className="aurora" aria-hidden />
       <div className="accent-rule absolute inset-x-0 bottom-0" aria-hidden />
       <div className="max-w-5xl">
         <div className="eyebrow">Independent journal · {siteConfig.edition}</div>

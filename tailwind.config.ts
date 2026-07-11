@@ -16,6 +16,7 @@ const config: Config = {
         ink: '#07090e',
         paper: 'var(--color-paper)',
         accent: 'var(--color-accent)',
+        accent2: 'var(--color-accent-two)',
         muted: 'var(--color-muted)',
         rule: '#272c38',
         // Intermediate zinc shade used by the VaporLoop demo (/vaporloop)

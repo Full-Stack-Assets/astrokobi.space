@@ -5,10 +5,11 @@ export const metadata = { title: 'About' };
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-4xl px-5 py-20 sm:px-8 sm:py-28">
+    <div className="relative mx-auto max-w-4xl px-5 py-20 sm:px-8 sm:py-28">
+      <div className="aurora aurora--soft" aria-hidden />
       <div className="eyebrow text-accent">About the journal</div>
       <h1 className="mt-6 max-w-3xl font-display text-5xl font-medium leading-[.92] tracking-[-.05em] sm:text-7xl">
-        Curiosity needs a longer horizon.
+        Curiosity needs a <span className="gradient-text">longer horizon.</span>
       </h1>
       <div className="mt-16 grid gap-12 border-t border-white/15 pt-10 md:grid-cols-[1fr_2fr]">
         <div className="font-mono text-[10px] uppercase leading-loose tracking-[.2em] text-muted">
