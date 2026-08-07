@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -50,11 +52,9 @@ jobs:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
         run: npx tsx scripts/run-local.ts
 
-      - name: Commit and push
-        env:
-          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
-          PRODUCTION_BRANCH: main
+      - name: Commit and push generated content
         run: |
+          set -euo pipefail
           git config user.name "trendblog-bot"
           git config user.email "bot@trendblog.dev"
 
@@ -72,15 +72,7 @@ jobs:
           branch="${GITHUB_REF_NAME:-main}"
           for attempt in 1 2 3 4 5; do
             if git push origin "HEAD:${branch}"; then
-              echo "Pushed on attempt ${attempt}."
-              if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ] && [ "${branch}" = "${PRODUCTION_BRANCH}" ]; then
-                echo "Triggering Vercel deploy hook…"
-                if curl -fsS -m 30 --retry 3 -X POST "${VERCEL_DEPLOY_HOOK_URL}" >/dev/null; then
-                  echo "Vercel redeploy triggered."
-                else
-                  echo "Vercel deploy hook call failed (non-fatal)." >&2
-                fi
-              fi
+              echo "Pushed on attempt ${attempt}; GitHub Pages will rebuild from the repository push."
               exit 0
             fi
             echo "Push rejected (attempt ${attempt}); rebasing onto origin/${branch} and retrying..."
