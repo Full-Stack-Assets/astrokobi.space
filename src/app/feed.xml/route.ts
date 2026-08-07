@@ -1,7 +1,7 @@
 import { listPosts } from '@/lib/posts';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/structured-data';
 
-export const revalidate = 300;
+export const dynamic = 'force-static';
 
 export async function GET() {
   const posts = await listPosts();
@@ -38,7 +38,6 @@ export async function GET() {
   return new Response(feed.trim(), {
     headers: {
       'content-type': 'application/xml; charset=utf-8',
-      'cache-control': 'public, max-age=300',
     },
   });
 }
