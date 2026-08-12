@@ -1,0 +1,19 @@
+name: Platform neutrality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tracked-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject retired provider literal
+        shell: bash
+        run: |
+          needle="$(printf '\166\145\162\143\145\154')"
+          if git grep -in "$needle"; then
+            echo "Retired deployment-provider literal remains in tracked files." >&2
+            exit 1
+          fi
