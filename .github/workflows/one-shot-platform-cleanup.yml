@@ -1,0 +1,130 @@
+name: One-shot platform cleanup
+
+on:
+  push:
+    branches:
+      - agent/remove-platform-coupling
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Remove retired integration and references
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+
+          root = Path('.')
+          domain = (root / 'CNAME').read_text().strip() if (root / 'CNAME').exists() else 'astrokobi.space'
+          canonical = f'https://{domain}'
+
+          manifest = root / 'vercel.json'
+          if manifest.exists():
+              manifest.unlink()
+
+          package_path = root / 'package.json'
+          package = json.loads(package_path.read_text())
+          for section in ('dependencies', 'devDependencies', 'optionalDependencies'):
+              values = package.get(section, {})
+              values.pop('@vercel/analytics', None)
+              values.pop('@vercel/speed-insights', None)
+          package_path.write_text(json.dumps(package, indent=2) + '\n')
+
+          def strip_hook_blocks(text: str) -> str:
+              lines, out = text.splitlines(), []
+              i = 0
+              while i < len(lines):
+                  line = lines[i]
+                  if re.search(r'^\s*if\b.*VERCEL', line):
+                      indent = len(line) - len(line.lstrip())
+                      i += 1
+                      while i < len(lines):
+                          candidate = lines[i]
+                          if candidate.strip() == 'fi' and len(candidate) - len(candidate.lstrip()) == indent:
+                              i += 1
+                              break
+                          i += 1
+                      continue
+                  if 'VERCEL_' in line:
+                      i += 1
+                      continue
+                  out.append(line)
+                  i += 1
+              text = '\n'.join(out) + '\n'
+              return re.sub(r'\n(\s*)env:\n(?=\1(?:run|uses|with|shell):)', '\n', text)
+
+          ignored = {'.git', 'node_modules', '.next', 'out', 'dist'}
+          suffixes = {'.md', '.mdx', '.txt', '.ts', '.tsx', '.js', '.mjs', '.cjs', '.json', '.yml', '.yaml', '.sh'}
+          for path in root.rglob('*'):
+              if not path.is_file() or any(part in ignored for part in path.parts):
+                  continue
+              if path.name == 'package-lock.json' or (path.suffix not in suffixes and path.name not in {'.env.example', '.env.production'}):
+                  continue
+              try:
+                  text = path.read_text()
+              except UnicodeDecodeError:
+                  continue
+              text = re.sub(r"^import \{ Analytics \} from '@vercel/analytics/next';\n", '', text, flags=re.M)
+              text = re.sub(r"^import \{ SpeedInsights \} from '@vercel/speed-insights/next';\n", '', text, flags=re.M)
+              text = re.sub(r'^\s*<Analytics\s*/>\n', '', text, flags=re.M)
+              text = re.sub(r'^\s*<SpeedInsights\s*/>\n', '', text, flags=re.M)
+              if path.suffix in {'.yml', '.yaml'}:
+                  text = strip_hook_blocks(text)
+              text = re.sub(r'https://[^\s\)\]"\']*\.vercel\.app[^\s\)\]"\']*', canonical, text, flags=re.I)
+              text = text.replace('vercel.json', '.github/workflows/pages.yml')
+              text = text.replace('Vercel KV / Redis', 'a shared Redis-compatible store')
+              text = text.replace('Vercel Cron', 'the repository scheduler')
+              text = text.replace('Vercel', 'GitHub Pages')
+              text = re.sub(r'\bvercel\b', 'static hosting', text, flags=re.I)
+              path.write_text(text)
+
+          gitignore = root / '.gitignore'
+          if gitignore.exists():
+              lines = [line for line in gitignore.read_text().splitlines() if '.vercel' not in line.lower()]
+              gitignore.write_text('\n'.join(lines) + '\n')
+          PY
+
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --no-audit --no-fund
+
+      - name: Verify static production build
+        shell: bash
+        run: |
+          domain="$(tr -d '\r\n' < CNAME)"
+          NEXT_PUBLIC_SITE_URL="https://${domain}" npm run build
+          test -f out/index.html
+
+      - name: Verify zero residual references
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-platform-cleanup.yml
+          if grep -RinI --exclude-dir=.git --exclude='*.pdf' 'vercel' .; then
+            echo 'Residual retired-platform reference found.' >&2
+            exit 1
+          fi
+
+      - name: Commit verified cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Remove retired hosting integration"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
