@@ -14,8 +14,6 @@
   "dependencies": {
     "@octokit/rest": "^21.0.2",
     "@tinacms/cli": "^2.1.8",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
     "cheerio": "^1.0.0",
     "gray-matter": "^4.0.3",
     "next": "^15.0.3",

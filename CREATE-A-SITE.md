@@ -2,7 +2,6 @@
 
 This repo is a self-contained, hourly auto-blog engine. Everything that makes it
 *this* site lives in **`src/site.config.ts`** — change that one file (plus a few
-secrets and a Vercel project/domain) and you have a new site in a different
 niche running the same engine.
 
 ## 1. Clone the template
@@ -29,10 +28,7 @@ This is the only file you must edit. Set:
 
 Nothing else needs editing for a basic site.
 
-## 3. Connect Vercel + a domain
 
-1. Import the new repo into Vercel (it auto-detects Next.js).
-2. Add a domain in Vercel → Settings → Domains (and point your registrar's DNS at it).
 3. Optionally set `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_ADSENSE_CLIENT` as env
    vars to override the config per-deploy.
 
@@ -48,7 +44,6 @@ Actions**:
 - `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`
   — optional; any unset source is skipped (Brave/Reddit can be dropped entirely,
   and `imageProvider: 'openverse'` needs no image key).
-- Optional integrations: `VERCEL_DEPLOY_HOOK_URL` (force a redeploy per post),
   `BLUESKY_*` / `MASTODON_*` / `DEVTO_API_KEY` (syndication), `BUTTONDOWN_API_KEY`
   (newsletter). All inert until set.
 

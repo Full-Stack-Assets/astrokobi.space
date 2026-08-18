@@ -32,7 +32,6 @@ jobs:
         run: npx tsx scripts/reimage.ts
       - name: Commit and push
         env:
-          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
           PRODUCTION_BRANCH: main
         run: |
           git config user.name "astrokobi-bot"
@@ -47,8 +46,6 @@ jobs:
           branch="${GITHUB_REF_NAME:-main}"
           for attempt in 1 2 3 4 5; do
             if git push origin "HEAD:${branch}"; then
-              if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ] && [ "${branch}" = "${PRODUCTION_BRANCH}" ]; then
-                curl -fsS -m 30 --retry 3 -X POST "${VERCEL_DEPLOY_HOOK_URL}" >/dev/null || true
               fi
               exit 0
             fi

@@ -13,7 +13,6 @@ identity, metadata, accent colors, and editorial collection at build time.
 
 A self-hosted, near-zero-cost space &amp; astronomy blog that writes itself. A scheduled job runs every hour, picks the highest-signal story from seven sources, researches it, writes a structured MDX post, and commits it to GitHub. The Next.js site auto-deploys.
 
-**Stack:** Next.js 15 · TinaCMS · Groq (free tier) · Brave Search · Pexels · GitHub Contents API · Vercel.
 
 **Monthly cost at steady state:** ~$0.
 
@@ -122,15 +121,10 @@ The hourly schedule lives in **`.github/workflows/generate.yml`**, which runs at
 
 Add the pipeline secrets (`GROQ_API_KEY`, `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`) under **Settings → Secrets and variables → Actions**. The workflow has `contents: write` and a `concurrency` group so a slow run never overlaps the next tick, plus a union merge driver (`scripts/merge-topic-log.mjs`) so concurrent appends to the topic log auto-merge instead of conflicting. Use the **Run workflow** button (`workflow_dispatch`) to trigger a one-off run.
 
-> **Why not a Vercel cron?** Vercel's Hobby (free) plan caps cron jobs at **once per day**, so an hourly tick there would be throttled. To stay at $0, scheduling lives in GitHub Actions. On Vercel **Pro** you can instead point an hourly cron at `/api/cron/generate` — the route already handles `Authorization: Bearer $CRON_SECRET`. Don't run both at once or you'll generate twice an hour.
 
-### Hosting — Vercel (easiest)
 
 1. Push this repo to GitHub.
-2. Import the repo into Vercel (it auto-detects Next.js; `vercel.json` sets the build command to `npm run build`).
-3. Add every env var from `.env.local` to the Vercel project.
 
-Vercel auto-deploys on every push, so each hourly commit from the Action redeploys the site. Optionally set `VERCEL_DEPLOY_HOOK_URL` as an Actions secret to force a redeploy after each post.
 
 ### Hosting — Cloudflare Pages (zero-cost route)
 

@@ -54,7 +54,6 @@ jobs:
 
       - name: Commit and push
         env:
-          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
           PRODUCTION_BRANCH: main
         run: |
           git config user.name "astrokobi-bot"
@@ -76,11 +75,6 @@ jobs:
           for attempt in 1 2 3 4 5; do
             if git push origin "HEAD:${branch}"; then
               echo "Pushed on attempt ${attempt}."
-              if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ] && [ "${branch}" = "${PRODUCTION_BRANCH}" ]; then
-                curl -fsS -m 30 --retry 3 -X POST "${VERCEL_DEPLOY_HOOK_URL}" >/dev/null \
-                  && echo "Vercel redeploy triggered." \
-                  || echo "Vercel deploy hook failed (non-fatal)." >&2
-              fi
               exit 0
             fi
             echo "Push rejected (attempt ${attempt}); rebasing..."

@@ -36,7 +36,6 @@ jobs:
 
       - name: Run backfill
         env:
-          # Site identity — must match .env.production / Vercel for astrokobi.space.
           NEXT_PUBLIC_SITE_VARIANT: astrokobi-space
           # LLM key — name must match `llm.apiKeyEnv` in src/site.config.ts.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}

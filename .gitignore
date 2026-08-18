@@ -7,5 +7,4 @@ tina/__generated__
 admin
 .DS_Store
 *.log
-.vercel
 .wrangler

@@ -22,7 +22,6 @@ product. This doc sketches how to package it as an offer.
 - The **growth/monetization layer** now in the repo: AdSense slots, newsletter
   (Buttondown) + weekly digest, and affiliate `<GearBox>` components.
 - **Zero-ops economics:** free tiers of Gemini/Groq, Brave, Pexels, GitHub
-  Actions, and Vercel/Cloudflare. The selling point competitors can't match on price.
 
 ---
 
