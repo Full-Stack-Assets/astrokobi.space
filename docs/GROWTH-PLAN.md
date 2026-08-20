@@ -2,7 +2,7 @@
 
 A concrete, do-this-next plan for turning the auto-blog into an audience asset and
 then a revenue line. Written against what already exists in this repo: a
-Buttondown-backed signup form (`src/components/SubscribeForm.tsx` → `/api/subscribe`),
+hosted signup link (`src/components/SubscribeForm.tsx` → `NEXT_PUBLIC_NEWSLETTER_SUBSCRIBE_URL`),
 a weekly digest workflow (`.github/workflows/newsletter.yml` → `scripts/newsletter-digest.ts`),
 AdSense slots, and the new `<GearBox>` affiliate components.
 

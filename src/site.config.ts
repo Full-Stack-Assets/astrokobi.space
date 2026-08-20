@@ -149,14 +149,12 @@ export const siteConfig = {
     apiKeyEnv: 'GROQ_API_KEY',
   },
 
-  // Automatic failover: the fallback exists to dodge the primary's 8K-TPM
-  // free-tier ceiling and transient outages. llama-4-scout has a 30K TPM
-  // free-tier cap on Groq (vs 8K for the gpt-oss models), so failover has real
-  // headroom when a request is rejected as too large or rate-limited.
-  // Same API key; generate.ts switches over on availability errors.
+  // Automatic failover: use a separately served model from Groq's current
+  // catalog so a recoverable primary failure does not route into a retired
+  // endpoint. The same API key is used for both providers.
   llmFallback: {
     endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    model: 'openai/gpt-oss-20b',
     apiKeyEnv: 'GROQ_API_KEY',
   },
 

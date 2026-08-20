@@ -179,11 +179,8 @@ App Router. Notable routes:
   related posts, sources, ads). `categories/[category]`, `tags/[tag]` — taxonomy.
 - `about`, `stats` (reads the topic log), `vaporloop` (a standalone demo page).
 - `feed.xml/route.ts` (RSS), `sitemap.ts`, `robots.ts`, `ads.txt/route.ts`.
-- `api/cron/generate/route.ts` — `GET`/`POST` that runs the pipeline; authorized
-  via `Authorization: Bearer $CRON_SECRET` (or `?secret=`). `nodejs` runtime,
-  `maxDuration = 300`. This is the serverless alternative to the GitHub Action.
-- `api/subscribe/route.ts` — newsletter signup (per-instance in-memory rate
-  limit, origin check).
+- Newsletter signup links to `NEXT_PUBLIC_NEWSLETTER_SUBSCRIBE_URL`; the static
+  site exposes no write-capable API routes.
 
 Branding/SEO derive from `siteConfig` via `src/lib/structured-data.ts`
 (`SITE_URL`/`SITE_NAME`/`SITE_DESCRIPTION`, with `NEXT_PUBLIC_SITE_URL` override —
@@ -196,10 +193,10 @@ note the empty-string guard, since unset CI secrets arrive as `""`).
   then commit & push with a rebase-retry loop. It registers a **union merge
   driver** (`scripts/merge-topic-log.mjs`, mapped in `.gitattributes`) so
   concurrent appends to `content/.topic-log.json` auto-merge instead of
-  conflicting. A `concurrency` group prevents overlapping ticks. Optional
+  conflicting. A `concurrency` group prevents overlapping ticks.
 - **`.github/workflows/newsletter.yml`** runs the weekly digest.
-  **Do not run the pipeline inside a Cloudflare Pages Function** — its ~30s CPU
-  limit is below the pipeline's 30–90s runtime; let the Action generate.
+- **`.github/workflows/pages.yml`** statically exports and deploys to GitHub
+  Pages. A successful generation workflow triggers it through `workflow_run`.
 
 ## Configuration & secrets
 

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tinacms dev -c \"next dev\"",
     "build": "bash scripts/build.sh",
+    "build:server": "DEPLOY_RUNTIME=server bash scripts/build.sh && node scripts/prepare-standalone.mjs",
     "start": "next start",
     "lint": "next lint",
     "generate": "tsx scripts/run-local.ts",

@@ -1,5 +1,6 @@
 node_modules
 .next
+/out
 .env
 .env.local
 .env*.local
@@ -7,4 +8,4 @@ tina/__generated__
 admin
 .DS_Store
 *.log
-.wrangler
+*.tsbuildinfo

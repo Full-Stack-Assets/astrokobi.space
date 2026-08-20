@@ -11,7 +11,7 @@ One codebase powers three independently deployable publications:
 Each domain repository includes a tracked `.env.production` selecting its site
 identity, metadata, accent colors, and editorial collection at build time.
 
-A self-hosted, near-zero-cost space &amp; astronomy blog that writes itself. A scheduled job runs every hour, picks the highest-signal story from seven sources, researches it, writes a structured MDX post, and commits it to GitHub. The Next.js site auto-deploys.
+A statically deployed publication powered by a scheduled editorial pipeline. Each hour it selects a high-signal story, researches it, prepares a structured MDX post, and commits it to GitHub. Successful generation runs trigger the existing Pages workflow.
 
 
 **Monthly cost at steady state:** ~$0.
@@ -67,7 +67,6 @@ cp .env.example .env.local
 | `PEXELS_API_KEY` | https://www.pexels.com/api/new/ | Unlimited for dev use (`imageProvider: 'openverse'` is keyless) |
 | `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | https://www.reddit.com/prefs/apps (create a "script" app) | Free |
 | `GITHUB_TOKEN` | github.com → Settings → Developer settings → Fine-grained PAT | Scope: **Contents: Read/Write** on the blog repo only |
-| `CRON_SECRET` | `openssl rand -hex 32` | — |
 
 Fill them into `.env.local` along with `GITHUB_OWNER` / `GITHUB_REPO` / `GITHUB_BRANCH`. Most keys are optional — any unset source is simply skipped. The **LLM key is the only hard requirement**, and its env var name must match `llm.apiKeyEnv` in `src/site.config.ts` (`GROQ_API_KEY` by default; swap to OpenRouter via the commented examples in that file).
 
@@ -117,26 +116,13 @@ the list.
 
 ### Scheduling — GitHub Actions (the hourly tick)
 
-The hourly schedule lives in **`.github/workflows/generate.yml`**, which runs at the top of every hour (`cron: '0 * * * *'`), executes the pipeline with `npx tsx scripts/run-local.ts`, and commits any new post straight to the repo. No serverless CPU limits, free logs, and the push triggers your host to redeploy. This is the scheduler — your host below is just for serving the site.
+The hourly schedule lives in **`.github/workflows/generate.yml`**. It executes the pipeline with `npx tsx scripts/run-local.ts` and commits any new post to the repository. A successful run triggers the existing GitHub Pages workflow.
 
 Add the pipeline secrets (`GROQ_API_KEY`, `BRAVE_API_KEY`, `PEXELS_API_KEY`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`) under **Settings → Secrets and variables → Actions**. The workflow has `contents: write` and a `concurrency` group so a slow run never overlaps the next tick, plus a union merge driver (`scripts/merge-topic-log.mjs`) so concurrent appends to the topic log auto-merge instead of conflicting. Use the **Run workflow** button (`workflow_dispatch`) to trigger a one-off run.
 
+### Hosting — GitHub Pages
 
-
-1. Push this repo to GitHub.
-
-
-### Hosting — Cloudflare Pages (zero-cost route)
-
-Deploy the Next.js blog to Pages purely as the static host — it's free and fast, and it redeploys on each push from the Action. Pages Functions have a **~30s CPU limit per request** and this pipeline runs 30–90s end-to-end, so **don't run the pipeline inside a Pages Function** — let the GitHub Action do the generation.
-
-### Self-host
-
-`npm run build && npm start` and point a reverse proxy at port 3000. The GitHub Action still drives generation; to trigger a run by hand, hit the route with `curl`:
-
-```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://your-domain/api/cron/generate
-```
+The approved production path is **`.github/workflows/pages.yml`**. It exports the site to `out/`, verifies `out/index.html` and `out/CNAME`, and deploys with GitHub Pages. In **Settings → Pages**, select **GitHub Actions** and configure `astrokobi.space` as the custom domain.
 
 ---
 
@@ -199,7 +185,7 @@ Dedup uses a sorted-token fingerprint of the title, so "JWST spots new galaxy" a
 
 **LLM rate limit** — Groq's free tier comfortably covers one post/hour, but if you're iterating locally, just wait a moment between runs.
 
-**Cloudflare Pages timeouts** — see the hosting note above. Pages Functions can't run this pipeline end-to-end; let the GitHub Action generate.
+**Pages configuration fails with “Not Found”** — enable GitHub Pages in repository Settings and select **GitHub Actions** as the source before rerunning the workflow.
 
 ---
 
@@ -210,6 +196,26 @@ Dedup uses a sorted-token fingerprint of the title, so "JWST spots new galaxy" a
 - **Change the niche / sources:** adjust `audience`, `categories`, and `sources` (`subreddits`, `rssFeeds`, `braveQueries`) in `src/site.config.ts`.
 - **Swap the LLM:** edit the `llm` block in `src/site.config.ts` (any OpenAI-compatible endpoint — Groq, OpenRouter, Gemini), and set the matching `apiKeyEnv` secret.
 - **Change the cadence:** edit the `cron` in `.github/workflows/generate.yml` (e.g. `0 */2 * * *` for every two hours, `0 12 * * *` for daily).
+
+---
+
+## Server-runtime build
+
+GitHub Pages remains the active production deployment until Human Authority
+selects and configures the replacement server host. The repository can also
+produce a provider-neutral Node.js runtime without changing that production
+boundary:
+
+~~~bash
+npm run build:server
+HOSTNAME=0.0.0.0 PORT=3000 node .next/standalone/server.js
+~~~
+
+The server build uses Next.js standalone output and packages both `public/`
+and `.next/static/`, preventing browser assets from returning 404 after
+deployment. A successful local build is not evidence of a production rollout;
+the approved host, secrets, custom-domain routing, health checks, and live-route
+verification are still required before changing the production claim.
 
 ---
 
